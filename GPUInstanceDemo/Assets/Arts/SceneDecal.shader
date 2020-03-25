@@ -59,8 +59,10 @@ Shader "MyShader/SceneDecal"
 
 			UNITY_INSTANCING_BUFFER_START(Props)
 			UNITY_DEFINE_INSTANCED_PROP(float, _Brightness)
+			UNITY_DEFINE_INSTANCED_PROP(fixed4, _DecalCol)
 			UNITY_INSTANCING_BUFFER_END(Props)
-            fixed4 _MianCol;
+			
+			fixed4 _MianCol;
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
@@ -72,7 +74,7 @@ Shader "MyShader/SceneDecal"
             fixed _Sketch;
             fixed4 _SketchColor;
 
-            fixed4 _DecalCol;
+            //fixed4 _DecalCol;
             fixed _Snow;
 
             fixed _ShineSwitch;        //shine
@@ -114,7 +116,7 @@ Shader "MyShader/SceneDecal"
                 half snow=saturate((normalDir-lerp(1,-1,_Snow))/0.001);
 
                 fixed3 finalColor=col.rgb*i.color;
-                finalColor+=normalDir*_DecalCol.rgb+snow*fixed3(1,1,1);
+                finalColor+=normalDir*UNITY_ACCESS_INSTANCED_PROP(Props, _DecalCol).rgb+snow*fixed3(1,1,1);
 
                 fixed gray=0.2125*finalColor.r+0.7154*finalColor.g+0.0721*finalColor.b;
                 fixed3 grayColor=fixed3(gray,gray,gray)*_GrayColor.rgb;
