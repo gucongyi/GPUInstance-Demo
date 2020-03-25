@@ -31,7 +31,7 @@ Shader "MyShader/SceneDecal"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fog
-			#pragma multi_compile_instancing 
+			#pragma multi_compile_instancing //这里,第一步
 
             #include "UnityCG.cginc"
 
@@ -41,7 +41,7 @@ Shader "MyShader/SceneDecal"
                 float2 uv : TEXCOORD0;
                 float2 uv2:TEXCOORD1;
                 float3 normal:NORMAL;
-				UNITY_VERTEX_INPUT_INSTANCE_ID 
+				UNITY_VERTEX_INPUT_INSTANCE_ID //这里,第二步
             };
 
             struct v2f
@@ -54,7 +54,7 @@ Shader "MyShader/SceneDecal"
                 float4 vertex : SV_POSITION;
                 float3 normal : NORMAL;
 				float4 worldpos : TEXCOORD3;        //shine
-				UNITY_VERTEX_INPUT_INSTANCE_ID 
+				UNITY_VERTEX_INPUT_INSTANCE_ID //这里,第二步
             };
 
 			UNITY_INSTANCING_BUFFER_START(Props)
@@ -84,8 +84,8 @@ Shader "MyShader/SceneDecal"
             v2f vert (appdata v)
             {
                 v2f o;
-				UNITY_SETUP_INSTANCE_ID(v); 
-                UNITY_TRANSFER_INSTANCE_ID(v,o); 
+				UNITY_SETUP_INSTANCE_ID(v); //这里第三步
+                UNITY_TRANSFER_INSTANCE_ID(v,o); //第三步
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 
                 float3 worldpos = mul(unity_ObjectToWorld, v.vertex).xyz;        //shine
@@ -99,7 +99,7 @@ Shader "MyShader/SceneDecal"
                 o.worldNormal=normalize(UnityObjectToWorldNormal(v.normal));
                 fixed3 ambient=UNITY_LIGHTMODEL_AMBIENT.xyz;
                 fixed3 worldLightDir=normalize(_WorldSpaceLightPos0.xyz);
-
+				//调用使用UNITY_ACCESS_INSTANCED_PROP(Props, 属性名)
                 o.color=_MianCol*UNITY_ACCESS_INSTANCED_PROP(Props, _Brightness)*saturate(dot(o.worldNormal,worldLightDir))*0.5+0.5+ambient;
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
@@ -107,7 +107,7 @@ Shader "MyShader/SceneDecal"
 
             fixed4 frag (v2f i) : SV_Target
             {
-				UNITY_SETUP_INSTANCE_ID(i); 
+				UNITY_SETUP_INSTANCE_ID(i); //最后一步
                 fixed4 col = tex2D(_MainTex, i.uv);
                 fixed4 col2=tex2D(_DecalTex,i.uv2);
                 half normalDir=dot(col2.rgb*i.worldNormal,fixed3(0,1,0));
